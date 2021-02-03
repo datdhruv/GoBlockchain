@@ -1,0 +1,3 @@
+package GOBlockchain
+
+Hash
