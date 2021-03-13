@@ -12,7 +12,7 @@ import (
 
 /* adjust this number based on the numeber of computers on the network
    and also as time passes and computational energy increases */
-const Difficulty = 12
+const Difficulty = 18
 
 type ProofOfWork struct {
 	Block  *Block
