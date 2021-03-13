@@ -40,7 +40,7 @@ func Handle(err error){
 
 // Genesis is the First Block in the chain
 func Genesis() *Block {
-eturn CreateBlock("Genesis", []byte{})
+return CreateBlock("Genesis", []byte{})
 } 
 
 // Serialize: is used because the badger database takes only serialized byte array
