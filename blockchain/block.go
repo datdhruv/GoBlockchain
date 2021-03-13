@@ -1,5 +1,11 @@
 package blockchain
 
+import (
+	"bytes"
+	"encoding/gob"
+	"log"
+)
+
 type Block struct {
 	Hash     []byte
 	Data     []byte
@@ -25,3 +31,40 @@ func CreateBlock(data string, prevHash []byte) *Block {
 	block.Hash = hash
 	return block
 }
+
+func Handle(err error){
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+// Genesis is the First Block in the chain
+func Genesis() *Block {
+eturn CreateBlock("Genesis", []byte{})
+} 
+
+// Serialize: is used because the badger database takes only serialized byte array
+func (b *Block) Serialize() []byte {
+	var res bytes.Buffer
+	encoder := gob.NewEncoder(&res)
+	 
+	err :=encoder.Encode(b)
+	Handle(err)
+
+	return res.Bytes()
+
+}
+
+// Deserialize: is used because the badger database takes only serialized byte array
+func Deserialize(data []byte) *Block {
+	var block Block
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+
+	err := decoder.Decode(&block)
+	 
+	Handle(err)
+
+	return &block
+}
+
+

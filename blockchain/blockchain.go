@@ -10,11 +10,6 @@ func (chain *Blockchain) AddBlock(data string) {
 	chain.Blocks = append(chain.Blocks, new)
 }
 
-// Genesis is the First Block in the chain
-func Genesis() *Block {
-	return CreateBlock("Genesis", []byte{})
-}
-
 func InitBlockchain() *Blockchain {
 	return &Blockchain{[]*Block{Genesis()}}
 }
