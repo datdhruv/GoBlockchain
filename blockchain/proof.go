@@ -71,9 +71,9 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 		} else {
 			nonce++
 		}
-		fmt.Println()
 
 	}
+	fmt.Println()
 	return nonce, hash[:]
 }
 
