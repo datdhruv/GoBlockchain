@@ -32,7 +32,7 @@ func CreateBlock(data string, prevHash []byte) *Block {
 	return block
 }
 
-func Handle(err error){
+func Handle(err error) {
 	if err != nil {
 		log.Panic(err)
 	}
@@ -40,15 +40,17 @@ func Handle(err error){
 
 // Genesis is the First Block in the chain
 func Genesis() *Block {
-return CreateBlock("Genesis", []byte{})
-} 
+	return CreateBlock("Genesis", []byte{})
+}
 
 // Serialize: is used because the badger database takes only serialized byte array
+// What is serialization in this context? It is a method with which you send the Type information of the variable
+// This is where the gob.NewEncoder come into picture
 func (b *Block) Serialize() []byte {
 	var res bytes.Buffer
 	encoder := gob.NewEncoder(&res)
-	 
-	err :=encoder.Encode(b)
+
+	err := encoder.Encode(b)
 	Handle(err)
 
 	return res.Bytes()
@@ -61,10 +63,8 @@ func Deserialize(data []byte) *Block {
 	decoder := gob.NewDecoder(bytes.NewReader(data))
 
 	err := decoder.Decode(&block)
-	 
+
 	Handle(err)
 
 	return &block
 }
-
-
