@@ -4,6 +4,7 @@ package blockchain
 // Value is the denomination/amount of the transaction
 // PubKey is the the Public key that is required to access the tokens in the Txn
 // Outputs are indivisible
+// TODO: Check, probably value is the amount given for a succesful mine
 type TxOutput struct {
 	Value  int
 	PubKey string
