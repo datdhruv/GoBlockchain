@@ -23,6 +23,7 @@ func InitBlockchain() *Blockchain {
 	var lastHash []byte
 
 	opts := badger.DefaultOptions("./tmp/blocks")
+	opts.Logger = nil
 	opts.Dir = dbPath
 	opts.ValueDir = dbPath
 
