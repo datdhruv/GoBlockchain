@@ -1,5 +1,12 @@
 package blockchain
 
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/gob"
+	"fmt"
+)
+
 // TxOutput: Contains the Value and Pubkey field
 // Value is the denomination/amount of the transaction
 // PubKey is the the Public key that is required to access the tokens in the Txn

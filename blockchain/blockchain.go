@@ -3,10 +3,14 @@ package blockchain
 import (
 	"fmt"
 	"github.com/dgraph-io/badger"
+	"os"
+	"runtime"
 )
 
 const (
-	dbPath = "./tmp/blocks"
+	dbPath      = "./tmp/blocks"
+	dbFile      = ".tmp/blocks/MANIFEST"
+	genesisData = "First Transaction from Genesis"
 )
 
 type Blockchain struct {
@@ -19,7 +23,50 @@ type BlockChainIterator struct {
 	Database    *badger.DB
 }
 
-func InitBlockchain() *Blockchain {
+func DBexists() bool {
+	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func InitBlockchain(address string) *Blockchain {
+	var lastHash []byte
+
+	if DBexists() {
+		fmt.Println("Blockchain already exists")
+		runtime.Goexit()
+	}
+	opts := badger.DefaultOptions("./tmp/blocks")
+	opts.Logger = nil
+	opts.Dir = dbPath
+	opts.ValueDir = dbPath
+
+	db, err := badger.Open(opts)
+	Handle(err)
+
+	err = db.Update(func(txn *badger.Txn) error {
+		cbtx := CoinbaseTx(address, genesisData)
+		genesis := Genesis(cbtx)
+		fmt.Println("Genesis proved")
+		err = txn.Set(genesis.Hash, genesis.Serialize())
+		Handle(err)
+		err = txn.Set([]byte("lh"), genesis.Hash)
+		lastHash = genesis.Hash
+
+		return err
+	})
+	Handle(err)
+	blockchain := Blockchain{lastHash, db}
+	return &blockchain
+}
+
+func ContinueBlockchain(address string) *Blockchain {
+	if DBexists() {
+		fmt.Println("Blockchain already exists")
+		runtime.Goexit()
+	}
+
 	var lastHash []byte
 
 	opts := badger.DefaultOptions("./tmp/blocks")
@@ -31,30 +78,36 @@ func InitBlockchain() *Blockchain {
 	Handle(err)
 
 	err = db.Update(func(txn *badger.Txn) error {
-		if _, err := txn.Get([]byte("lh")); err == badger.ErrKeyNotFound {
-			fmt.Println("No existing blockchain found")
-			genesis := Genesis()
-			fmt.Println("Genesis proved")
-			err = txn.Set(genesis.Hash, genesis.Serialize())
-			Handle(err)
-			err = txn.Set([]byte("lh"), genesis.Hash)
-			lastHash = genesis.Hash
+		item, err := txn.Get([]byte("lh"))
+		Handle(err)
 
-			return err
-		} else {
-			item, err := txn.Get([]byte("lh"))
-			Handle(err)
-			err = item.Value(func(val []byte) error {
-				lastHash = val
-				return nil
-			})
-			return err
-		}
+		err = item.Value(func(val []byte) error {
+			lastHash = val
+			return nil
+		})
+
+		return err
 	})
 
 	Handle(err)
 	blockchain := Blockchain{lastHash, db}
 	return &blockchain
+}
+
+func (chain *Blockchain) FindUnspentTransations(address string) []Transaction {
+	var unspentTxns []Transaction
+
+	spentTXOs := make(map[string][]int)
+
+	iter := chain.Iterator()
+
+	for {
+		block := iter.Next()
+
+		if len(block.PrevHash) == 0 {
+			break
+		}
+	}
 }
 
 func (chain *Blockchain) AddBlock(data string) {
