@@ -1,4 +1,4 @@
-module github.com/datDhruvJain/GOBlockChain
+module github.com/datDhruvJain/GOBlockchain
 
 go 1.16
 
