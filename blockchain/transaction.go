@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"encoding/hex"
 	"fmt"
+	"log"
 )
 
 // TxOutput: Contains the Value and Pubkey field
@@ -35,8 +37,6 @@ func CoinbaseTx(to string, data string) *Transaction {
 		data = fmt.Sprintf("Coins to %s", to)
 	}
 
-	// Here we are just saying that we are giving 100 tokens for free
-	// If the data field is null
 	txin := TxInput{[]byte{}, -1, data}
 	txout := TxOutput{100, to}
 
@@ -49,7 +49,7 @@ func CoinbaseTx(to string, data string) *Transaction {
 // SetID: Creates and sets hash based on the bytes that are in the tx (Transaction)
 func (tx *Transaction) SetID() {
 	var encoded bytes.Buffer
-	var hash [32]hash
+	var hash [32]byte
 
 	encode := gob.NewEncoder(&encoded)
 	err := encode.Encode(tx)
@@ -63,7 +63,6 @@ func (tx *Transaction) SetID() {
 // IsCoinbase: Checks if the transaction is a base transaction
 func (tx *Transaction) IsCoinbase() bool {
 	return len(tx.Inputs) == 1 && len(tx.Inputs[0].ID) == 0 && tx.Inputs[0].Out == -1
-
 }
 
 func (in *TxInput) CanUnlock(data string) bool {
@@ -72,4 +71,35 @@ func (in *TxInput) CanUnlock(data string) bool {
 
 func (out *TxOutput) CanBeUnlocked(data string) bool {
 	return out.PubKey == data
+}
+
+func NewTransaction(from, to string, amount int, chain *Blockchain) *Transaction {
+	var inputs []TxInput
+	var outputs []TxOutput
+
+	acc, validOutpus := chain.FindSpendableOutputs(from, amount)
+	if acc < amount {
+		log.Panic("Erron: not enough funds")
+	}
+
+	for txid, outs := range validOutpus {
+		txID, err := hex.DecodeString(txid)
+		Handle(err)
+
+		for _, out := range outs {
+			input := TxInput{txID, out, from}
+			inputs = append(inputs, input)
+		}
+	}
+
+	outputs = append(outputs, TxOutput{amount, to})
+
+	if acc > amount {
+		outputs = append(outputs, TxOutput{acc - amount, from})
+	}
+
+	tx := Transaction{nil, inputs, outputs}
+	tx.SetID()
+
+	return &tx
 }

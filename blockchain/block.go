@@ -8,10 +8,10 @@ import (
 )
 
 type Block struct {
-	Hash        []byte
-	Transaction []*Transaction
-	PrevHash    []byte
-	Nonce       int
+	Hash         []byte
+	Transactions []*Transaction
+	PrevHash     []byte
+	Nonce        int
 }
 
 //func (b *Block) DeriveHash() {
