@@ -35,7 +35,7 @@ import (
 
 /* adjust this number based on the numeber of computers on the network
    and also as time passes and computational energy increases */
-const Difficulty = 18
+const Difficulty = 22
 
 type ProofOfWork struct {
 	Block  *Block
@@ -59,7 +59,7 @@ func (pow *ProofOfWork) InitData(nonce int) []byte {
 	data := bytes.Join(
 		[][]byte{
 			pow.Block.PrevHash,
-			pow.Block.Data,
+			pow.Block.HashTransactions(),
 			ToHex(int64(nonce)),
 			ToHex(int64(Difficulty)),
 		},
